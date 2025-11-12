@@ -1,5 +1,10 @@
 # Particule Framework Documentation
 
+>[!WARNING]
+>Particule is in its early stages of development. It might have bugs and issues. If any occur, please create one in 'Issues'.
+>Thank you!
+
+
 ## Overview
 
 Particule is a Python web framework that brings React-like component architecture and declarative UI building to Python. It allows you to create interactive web applications using familiar React patterns while writing pure Python code.
@@ -544,3 +549,4 @@ Check the repository for license information.
 ---
 
 Built with ❤️ using Python
+
