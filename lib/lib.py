@@ -676,7 +676,8 @@ class App:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyReact App</title>
+    <title>Particle App</title>
+    <link rel="icon" type="image/svg+xml" href="static/Logo.svg">
     <style>
         * {{
             margin: 0;
@@ -775,11 +776,13 @@ class App:
                 pass
         
         server = HTTPServer(('localhost', self.port), RequestHandler)
+        print("========================================================")
         print(f"🚀 PyReact app running at http://localhost:{self.port}")
         print(f"📁 Static files served from: {self.static_dir}")
         print(f"🔌 API routes: {list(self.api_routes.keys())}")
         print(f"Press Ctrl+C to stop the server")
-        
+        print("========================================================")
+
         try:
             server.serve_forever()
         except KeyboardInterrupt:
