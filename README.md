@@ -17,9 +17,10 @@
 
 <br><br>
 ## Contributing
-
+To Contribute see [CONTRIBUTING.md](https://github.com/FCzajkowski/Particule/blob/main/CONTRIBUTING.md)
 <br><br>
 ## License
+[LICENSE](https://github.com/FCzajkowski/Particule/blob/main/LICENSE.md)
 <br><br>
 
 <div align="center">
