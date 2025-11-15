@@ -242,11 +242,12 @@ class PyScript:
         self.statements.append(js_code)
         return self
     
-    def append_item(self, list_id, item_html):
+    def append_item(self, list_id, item_text):
+        """Append an item to a list - FIXED to properly get input value"""
         js_code = f"""
         let list = document.getElementById('{list_id}');
         let li = document.createElement('li');
-        li.innerHTML = '{item_html}';
+        li.textContent = {item_text};
         list.appendChild(li);
         """
         self.statements.append(js_code)
@@ -255,6 +256,10 @@ class PyScript:
     def clear_input(self, input_id):
         self.statements.append(f"document.getElementById('{input_id}').value = ''")
         return self
+    
+    def get_value(self, input_id):
+        """Get the value from an input - returns JS expression"""
+        return f"document.getElementById('{input_id}').value"
     
     def custom(self, js_code):
         self.statements.append(js_code)
@@ -376,7 +381,7 @@ class Animation:
 # ============= ROUTING =============
 
 class Router:
-    """Simple SPA router"""
+    """Simple SPA router with actual re-rendering"""
     def __init__(self):
         self.routes = {}
         self.not_found = None
@@ -390,23 +395,42 @@ class Router:
         self.not_found = component
     
     def get_route_js(self):
-        """Generate JavaScript router code"""
-        routes_json = json.dumps({path: f"route_{i}" for i, path in enumerate(self.routes.keys())})
+        """Generate JavaScript router code that actually renders components"""
+        # Build route HTML map
+        routes_html = {}
+        for path, component in self.routes.items():
+            comp_instance = component()
+            if isinstance(comp_instance, Component):
+                rendered = comp_instance.render()
+            else:
+                rendered = comp_instance
+            routes_html[path] = rendered.to_html() if isinstance(rendered, Element) else str(rendered)
+        
+        not_found_html = ""
+        if self.not_found:
+            nf_instance = self.not_found()
+            if isinstance(nf_instance, Component):
+                rendered = nf_instance.render()
+            else:
+                rendered = nf_instance
+            not_found_html = rendered.to_html() if isinstance(rendered, Element) else str(rendered)
+        
+        routes_json = json.dumps(routes_html)
+        not_found_json = json.dumps(not_found_html)
         
         return f"""
         <script>
+        const routesMap = {routes_json};
+        const notFoundHTML = {not_found_json};
+        
         function renderRoute() {{
             const hash = window.location.hash.slice(1) || '/';
             const app = document.getElementById('app');
             
-            // Simple route matching
-            const routes = {routes_json};
-            
-            if (routes[hash]) {{
-                // In a real implementation, this would re-render the component
-                console.log('Navigating to:', hash);
+            if (routesMap[hash]) {{
+                app.innerHTML = routesMap[hash];
             }} else {{
-                console.log('Route not found:', hash);
+                app.innerHTML = notFoundHTML || '<h1>404 - Page Not Found</h1>';
             }}
         }}
         
@@ -430,16 +454,19 @@ class Element:
             content = content.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
             return content
         
-        # Handle event handlers
+        # Handle event handlers - FIXED
         props_copy = self.props.copy()
         for key in list(props_copy.keys()):
             if key.startswith('on_'):
                 event_name = key[3:]
                 handler_code = props_copy[key]
+                
+                # If it's a callable, execute it with a PyScript instance
                 if callable(handler_code):
                     script = PyScript()
                     handler_code(script)
                     handler_code = script.to_js()
+                
                 props_copy[f'on{event_name}'] = handler_code
                 del props_copy[key]
         self.props = props_copy
@@ -777,7 +804,7 @@ class App:
         
         server = HTTPServer(('localhost', self.port), RequestHandler)
         print("========================================================")
-        print(f"🚀 PyReact app running at http://localhost:{self.port}")
+        print(f"🚀 Particule app running at http://localhost:{self.port}")
         print(f"📁 Static files served from: {self.static_dir}")
         print(f"🔌 API routes: {list(self.api_routes.keys())}")
         print(f"Press Ctrl+C to stop the server")
