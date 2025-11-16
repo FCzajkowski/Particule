@@ -26,3 +26,4 @@ To Contribute see [CONTRIBUTING.md](https://github.com/FCzajkowski/Particule/blo
 <div align="center">
   <p>Thank you for using <b>Particule</b> ❤️</p>
 </div>
+
